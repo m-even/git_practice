@@ -16,3 +16,10 @@ class Config:
 
     # Disable modification tracking for SQLAlchemy, as it's not needed and adds overhead
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class TestConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # Use in-memory SQLite for tests
+    WTF_CSRF_ENABLED = False # Often useful for tests, disable CSRF protection
+    # You might also want to set a specific SECRET_KEY for tests if it matters
+    # SECRET_KEY = 'test-secret-key' 
