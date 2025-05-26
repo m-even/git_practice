@@ -107,8 +107,28 @@ class Reward(db.Model):
     # claimed_by_children = db.relationship('User', secondary='reward_claims', backref=db.backref('claimed_rewards', lazy='dynamic'))
     # This would require a secondary association table 'reward_claims'. For now, keeping it simple as per task.
 
+    # Removed social_provider and social_id fields
+    social_accounts = db.relationship('SocialAccount', back_populates='user', lazy='dynamic', cascade="all, delete-orphan")
+
     def __repr__(self):
         return f'<Reward {self.name} - Cost: {self.point_cost}>'
+
+
+class SocialAccount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    provider_name = db.Column(db.String(50), nullable=False) # e.g., 'google', 'facebook', 'apple'
+    provider_user_id = db.Column(db.String(255), nullable=False) # Unique ID from the provider
+    # Optional: email = db.Column(db.String(150), nullable=True)
+    # Optional: username_on_provider = db.Column(db.String(150), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', back_populates='social_accounts')
+
+    __table_args__ = (db.UniqueConstraint('provider_name', 'provider_user_id', name='uq_social_account_provider_user'),)
+    
+    def __repr__(self):
+        return f"<SocialAccount {self.provider_name}:{self.provider_user_id} for User {self.user_id}>"
 
 class RewardRedemptionLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)

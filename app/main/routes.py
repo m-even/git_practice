@@ -115,6 +115,363 @@ def child_history_view():
 # --- API Routes (Backend Logic) ---
 # (Existing API routes remain below this section)
 
+from flask_dance.contrib.google import google # google object from blueprint
+
+@bp.route("/login/google/callback") # Or whatever you named it in redirect_to
+def google_login_callback():
+    if not google.authorized:
+        flash("Failed to log in with Google.", "danger")
+        return redirect(url_for("main.login_view")) 
+
+    resp = google.get("/oauth2/v2/userinfo") 
+    if not resp.ok:
+        flash("Failed to fetch user info from Google.", "danger")
+        return redirect(url_for("main.login_view"))
+    
+    user_info = resp.json()
+    email = user_info.get("email")
+    google_user_id = user_info.get("id")
+    # Consider extracting name parts: given_name, family_name for username generation
+
+    if not google_user_id:
+        flash("Could not retrieve a user ID from Google.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    # 1. Primary Lookup by SocialAccount
+    social_account = SocialAccount.query.filter_by(
+        provider_name="google", 
+        provider_user_id=google_user_id
+    ).first()
+
+    if social_account:
+        user = social_account.user
+        login_user(user)
+        flash("Successfully logged in with Google!", "success")
+        if user.role == "parent": return redirect(url_for("main.parent_dashboard"))
+        elif user.role == "child": return redirect(url_for("main.child_chores_view"))
+        return redirect(url_for("main.index"))
+
+    # 2. Secondary Lookup/Creation (if no SocialAccount found by provider_user_id)
+    if not email:
+        # This case is important: if Google doesn't provide email and no existing SocialAccount,
+        # we cannot reliably link or create a User account without asking for more info.
+        flash("Google account did not provide an email address. Cannot link or create account without an email.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        # User with this email exists, link this Google account to them
+        # Defensive check: ensure this specific Google account isn't already linked to *another* user.
+        existing_social_for_this_google_id = SocialAccount.query.filter_by(provider_name="google", provider_user_id=google_user_id).first()
+        if existing_social_for_this_google_id and existing_social_for_this_google_id.user_id != user.id:
+            flash("This Google account is already linked to a different user in our system.", "danger")
+            return redirect(url_for("main.login_view"))
+        
+        # Check if this user already has a google account linked (maybe under a different google_user_id, which is unlikely but a good check)
+        user_already_has_this_google = user.social_accounts.filter_by(provider_name="google", provider_user_id=google_user_id).first()
+        if user_already_has_this_google:
+            # This specific google account is already linked to this user. Just log in.
+            pass # Already handled by primary lookup if this was the case. This path implies it wasn't.
+                 # However, if primary lookup was by social_id and email was different, this logic might be hit.
+                 # For safety, we can just proceed to login if user object is valid.
+        else:
+            # Link the new Google social account to the existing user
+            new_social_link = SocialAccount(
+                user_id=user.id,
+                provider_name="google",
+                provider_user_id=google_user_id
+            )
+            db.session.add(new_social_link)
+            db.session.commit()
+            flash("Your existing account has been successfully linked with Google.", "info")
+        
+        login_user(user)
+        flash("Successfully logged in with Google!", "success")
+    else:
+        # No user with this email, create new User and new SocialAccount
+        username_base = user_info.get("given_name", "") 
+        if not username_base: # Fallback to email prefix if no given_name
+            username_base = email.split('@')[0]
+        
+        username_candidate = username_base.lower()
+        counter = 1
+        while User.query.filter_by(username=username_candidate).first():
+            username_candidate = f"{username_base.lower()}_{counter}"
+            counter += 1
+        
+        new_user = User(
+            email=email,
+            username=username_candidate, 
+            role="parent" # Default role for new social signups
+            # Password can be left null/unusable for social-only logins
+        )
+        # Create SocialAccount and associate with new_user
+        new_social_account = SocialAccount(
+            user=new_user, # Associate directly with the new_user object
+            provider_name="google",
+            provider_user_id=google_user_id
+        )
+        db.session.add(new_user) # SQLAlchemy will handle order due to relationship
+        db.session.add(new_social_account)
+        db.session.commit() 
+        
+        login_user(new_user)
+        flash("Account created via Google and logged in successfully!", "success")
+
+    if current_user.role == "parent":
+        return redirect(url_for("main.parent_dashboard")) 
+    elif current_user.role == "child": 
+        return redirect(url_for("main.child_chores_view"))
+    return redirect(url_for("main.index"))
+
+from flask_dance.contrib.facebook import facebook # facebook object from blueprint
+
+@bp.route("/login/facebook/callback")
+def facebook_login_callback():
+    if not facebook.authorized:
+        flash("Failed to log in with Facebook.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    # Facebook API requires specifying fields for user info
+    resp = facebook.get("/me?fields=id,name,email") 
+    if not resp.ok:
+        flash("Failed to fetch user info from Facebook.", "danger")
+        return redirect(url_for("main.login_view"))
+    
+    user_info = resp.json()
+    email = user_info.get("email")
+    facebook_user_id = user_info.get("id")
+    # name = user_info.get("name") # Optional: can use for username generation
+
+    if not facebook_user_id:
+        flash("Could not retrieve a user ID from Facebook.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    # 1. Primary Lookup by SocialAccount
+    social_account = SocialAccount.query.filter_by(
+        provider_name="facebook", 
+        provider_user_id=facebook_user_id
+    ).first()
+
+    if social_account:
+        user = social_account.user
+        login_user(user)
+        flash("Successfully logged in with Facebook!", "success")
+        if user.role == "parent": return redirect(url_for("main.parent_dashboard"))
+        elif user.role == "child": return redirect(url_for("main.child_chores_view"))
+        return redirect(url_for("main.index"))
+
+    # 2. Secondary Lookup/Creation
+    if not email:
+        flash("Facebook account did not provide an email address. Cannot link or create account without an email.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        # User with this email exists, link this Facebook account
+        existing_social_for_this_fb_id = SocialAccount.query.filter_by(provider_name="facebook", provider_user_id=facebook_user_id).first()
+        if existing_social_for_this_fb_id and existing_social_for_this_fb_id.user_id != user.id:
+            flash("This Facebook account is already linked to a different user.", "danger")
+            return redirect(url_for("main.login_view"))
+
+        new_social_link = SocialAccount(
+            user_id=user.id,
+            provider_name="facebook",
+            provider_user_id=facebook_user_id
+        )
+        db.session.add(new_social_link)
+        db.session.commit()
+        login_user(user)
+        flash("Existing account linked with Facebook. Logged in successfully!", "success")
+    else:
+        # No user with this email, create new User and new SocialAccount
+        username_base = user_info.get("name", email.split('@')[0]).replace(" ", "").lower()
+        username_candidate = username_base
+        counter = 1
+        while User.query.filter_by(username=username_candidate).first():
+            username_candidate = f"{username_base}_{counter}"
+            counter += 1
+        
+        new_user = User(
+            email=email,
+            username=username_candidate, 
+            role="parent" 
+        )
+        new_social_account = SocialAccount(
+            user=new_user,
+            provider_name="facebook",
+            provider_user_id=facebook_user_id
+        )
+        db.session.add(new_user)
+        db.session.add(new_social_account)
+        db.session.commit()
+        
+        login_user(new_user)
+        flash("Account created via Facebook and logged in successfully!", "success")
+
+    if current_user.role == "parent":
+        return redirect(url_for("main.parent_dashboard")) 
+    elif current_user.role == "child": 
+        return redirect(url_for("main.child_chores_view"))
+    return redirect(url_for("main.index"))
+
+# Note on Apple Login:
+# Flask-Dance does not have a simple pre-built Apple blueprint like Google/Facebook
+# due to Apple's use of JWTs for client secrets and specific data handling.
+# The following callback assumes that the complex parts of token exchange and
+# id_token decoding have been handled (e.g., by a more specialized library or custom code)
+# and that `email`, `apple_user_id`, and optionally `name_parts` are available.
+# For this subtask, we are focusing on the user provisioning logic based on these assumed inputs.
+
+@bp.route("/login/apple/callback", methods=["GET", "POST"]) 
+def apple_login_callback():
+    # --- SIMULATED DATA EXTRACTION (conceptual) ---
+    # In a real implementation, this data would come from decoding Apple's id_token
+    # and potentially from the POST request body on the first authorization.
+    # For example:
+    # apple_user_id = id_token_payload.get("sub")
+    # email = id_token_payload.get("email")
+    # is_private_email = id_token_payload.get("is_private_email") 
+    # user_form_data = request.form.get('user') # JSON string with name, email (first time)
+    # if user_form_data:
+    #     name_info = json.loads(user_form_data).get('name', {})
+    #     first_name = name_info.get('firstName')
+    #     last_name = name_info.get('lastName')
+
+    # For the purpose of this subtask, we'll use placeholder/mocked values
+    # to demonstrate the user provisioning flow.
+    # In a real app, these would need to be securely obtained and validated.
+    
+    # Simulate data that might be available after Apple's response processing
+    # This would be replaced by actual data extraction logic.
+    # We use request.form to simulate Apple's typical POST of user data on first auth.
+    
+    apple_user_id_from_token = request.form.get('mock_apple_user_id_from_token', "SIMULATED_APPLE_ID_FROM_TOKEN_ONLY") 
+    email_from_token = request.form.get('mock_email_from_token', "user.from.token@privaterelay.appleid.com")
+    
+    # Apple often sends 'user' (JSON string) and 'id_token' in the POST body to callback.
+    # The 'user' field is typically only sent on the first authorization.
+    user_field_str = request.form.get('user') # This is what Apple might send
+    id_token_str = request.form.get('id_token') # The JWT from Apple
+
+    # ---- Actual data extraction would be more complex ----
+    # For this subtask, we'll primarily rely on simulated/mocked direct inputs if the above are not present.
+    # This simulates that the token has been decoded and info extracted.
+    
+    apple_user_id = request.form.get('apple_user_id', apple_user_id_from_token)
+    email = request.form.get('email', email_from_token) # Email from form takes precedence if Apple POSTs it
+    
+    first_name = request.form.get('firstName') # Apple might send name parts in 'user' JSON
+    last_name = request.form.get('lastName')
+    
+    # If 'user' field is present (typical for first Apple Sign-In POST)
+    if user_field_str:
+        try:
+            user_data_from_apple_post = json.loads(user_field_str)
+            if 'email' in user_data_from_apple_post:
+                email = user_data_from_apple_post['email'] # Prefer email from this structure if available
+            if 'name' in user_data_from_apple_post:
+                name_parts_from_apple = user_data_from_apple_post['name']
+                first_name = name_parts_from_apple.get('firstName', first_name)
+                last_name = name_parts_from_apple.get('lastName', last_name)
+        except json.JSONDecodeError:
+            flash("Invalid user data format from Apple.", "danger")
+            return redirect(url_for("main.login_view"))
+
+    # Actual id_token decoding would happen here in a real app.
+    # For now, apple_user_id and email are assumed to be extracted or mocked.
+
+    if not apple_user_id:
+        flash("Failed to get user identifier from Apple.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    # 1. Primary Lookup by SocialAccount
+    social_account = SocialAccount.query.filter_by(
+        provider_name="apple", 
+        provider_user_id=apple_user_id
+    ).first()
+
+    if social_account:
+        user = social_account.user
+        # Optionally update email if it has changed and is not private relay, and not taken by another user
+        if email and user.email != email and not ("privaterelay.appleid.com" in email):
+            existing_email_user = User.query.filter(User.email == email, User.id != user.id).first()
+            if not existing_email_user:
+                user.email = email
+                db.session.commit()
+                flash("Your email address has been updated.", "info")
+            # else: flash warning if new email is taken, user logged in with old email.
+        
+        login_user(user)
+        flash("Successfully logged in with Apple!", "success")
+        if user.role == "parent": return redirect(url_for("main.parent_dashboard"))
+        elif user.role == "child": return redirect(url_for("main.child_chores_view"))
+        return redirect(url_for("main.index"))
+
+    # 2. Secondary Lookup/Creation (if no SocialAccount found by provider_user_id)
+    if not email:
+        flash("Email not provided by Apple. Cannot link or create account without an email.", "danger")
+        return redirect(url_for("main.login_view"))
+
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        # User with this email exists, link this Apple account to them
+        # Defensive check: ensure this specific Apple account isn't already linked to *another* user.
+        existing_social_for_this_apple_id = SocialAccount.query.filter_by(provider_name="apple", provider_user_id=apple_user_id).first()
+        if existing_social_for_this_apple_id and existing_social_for_this_apple_id.user_id != user.id:
+            flash("This Apple account is already linked to a different user in our system.", "danger")
+            return redirect(url_for("main.login_view"))
+
+        new_social_link = SocialAccount(
+            user_id=user.id,
+            provider_name="apple",
+            provider_user_id=apple_user_id
+        )
+        db.session.add(new_social_link)
+        db.session.commit()
+        login_user(user)
+        flash("Existing account linked with Apple. Logged in successfully!", "success")
+    else:
+        # No user with this email, create new User and new SocialAccount
+        username_parts = [part for part in [first_name, last_name] if part] # Uses first/last name from form if available
+        if not username_parts: 
+            username_base = email.split('@')[0]
+        else:
+            username_base = "".join(username_parts).lower()
+            
+        username_candidate = username_base
+        counter = 1
+        while User.query.filter_by(username=username_candidate).first():
+            username_candidate = f"{username_base}_{counter}"
+            counter += 1
+        
+        new_user = User(
+            email=email,
+            username=username_candidate, 
+            role="parent" # Default role for new social signups
+        )
+        new_social_account = SocialAccount(
+            user=new_user, 
+            provider_name="apple",
+            provider_user_id=apple_user_id
+        )
+        db.session.add(new_user)
+        db.session.add(new_social_account)
+        db.session.commit()
+        
+        login_user(new_user)
+        flash("Account created via Apple and logged in successfully!", "success")
+
+    if current_user.role == "parent":
+        return redirect(url_for("main.parent_dashboard")) 
+    elif current_user.role == "child": 
+        return redirect(url_for("main.child_chores_view")) 
+    return redirect(url_for("main.index"))
+
+
 @bp.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()

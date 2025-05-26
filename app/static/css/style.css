@@ -1,56 +1,81 @@
-/* Basic styling for the application */
-body {
-    font-family: Arial, sans-serif;
+/* General Reset and Base Styles */
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
     background-color: #f4f4f4;
     color: #333;
-    line-height: 1.6;
+    display: flex; /* For sticky footer */
+    flex-direction: column; /* For sticky footer */
+    min-height: 100vh; /* For sticky footer */
 }
 
 .container {
-    width: 80%;
+    width: 90%; /* More responsive width */
+    max-width: 1100px; /* Max width for larger screens */
     margin: auto;
     overflow: hidden;
     padding: 0 20px;
 }
 
-/* Header and Navigation Bar */
+/* Header and Navigation */
 header {
     background: #333;
     color: #fff;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px 0; /* Adjusted padding */
     border-bottom: #0779e4 3px solid;
+    width: 100%;
+}
+
+.nav-container { /* This div wraps the navbar within header */
+    width: 90%;
+    max-width: 1100px;
+    margin: auto;
+    overflow: hidden; /* To contain floats or flex items */
 }
 
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.5rem 0; /* Some padding inside navbar */
 }
 
-.nav-container {
-    width: 80%; /* Match container width for alignment */
-    margin: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-
-.nav-brand {
+.navbar-brand {
     color: #fff;
     text-decoration: none;
-    font-size: 1.5em;
+    font-size: 1.8em; /* Slightly larger brand */
     font-weight: bold;
+}
+
+.navbar-toggler {
+    display: none; /* Hidden by default, shown on mobile */
+    background: none;
+    border: 1px solid #fff;
+    color: #fff;
+    font-size: 1.5em;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.navbar-collapse {
+    display: flex; /* Default for desktop */
+}
+
+.navbar-collapse.active { /* This class will be toggled by JS */
+    display: block; /* Show on mobile when active */
 }
 
 .nav-links {
     list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
+    display: flex; /* Horizontal layout for desktop */
+    align-items: center; /* Align items vertically in the nav bar */
 }
 
 .nav-links li {
@@ -60,184 +85,365 @@ header {
 .nav-links a {
     color: #fff;
     text-decoration: none;
-    font-size: 1em;
+    padding: 0.5rem; /* Add some padding for easier clicking */
+    display: block; /* Make the whole area clickable */
 }
 
 .nav-links a:hover {
     color: #0779e4;
+    background-color: #444; /* Slight hover background */
+    border-radius: 4px;
 }
 
 .nav-user-info {
-    color: #ccc; /* Lighter color for user info text */
+    color: #ccc;
     margin-right: 10px;
+    padding: 0.5rem;
 }
 
-
 /* Main Content Area */
-main.container {
+.main-content {
+    flex-grow: 1; /* For sticky footer */
     padding-top: 20px;
     padding-bottom: 20px;
     background-color: #fff;
-    min-height: 70vh; /* Ensure it takes up reasonable space */
-    margin-top: 20px; /* Space from header */
+    margin-top: 20px;
+    margin-bottom: 20px; /* Space before footer */
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 90%; /* Match .container for consistency */
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .page-header h1 {
     color: #333;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
+    margin-bottom: 20px; /* Spacing after header */
 }
 
-/* Flashed Messages */
+/* Flashed Messages Styling */
 .flashes {
     list-style: none;
     padding: 0;
-    margin-bottom: 20px;
+    margin: 0 0 20px 0; /* Add margin to bottom */
 }
 .flashes .alert {
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 15px; /* More padding */
+    margin-bottom: 15px;
     border: 1px solid transparent;
     border-radius: 4px;
+    text-align: center;
 }
-.alert-success {
-    color: #3c763d;
-    background-color: #dff0d8;
-    border-color: #d6e9c6;
-}
-.alert-danger {
-    color: #a94442;
-    background-color: #f2dede;
-    border-color: #ebccd1;
-}
-.alert-info {
-    color: #31708f;
-    background-color: #d9edf7;
-    border-color: #bce8f1;
-}
-.alert-warning {
-    color: #8a6d3b;
-    background-color: #fcf8e3;
-    border-color: #faebcc;
-}
-
+/* Alert color styles remain the same */
+.alert-success { color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; }
+.alert-danger { color: #a94442; background-color: #f2dede; border-color: #ebccd1; }
+.alert-info { color: #31708f; background-color: #d9edf7; border-color: #bce8f1; }
+.alert-warning { color: #8a6d3b; background-color: #fcf8e3; border-color: #faebcc; }
 
 /* Footer */
-footer {
+.footer-content {
     text-align: center;
     padding: 20px;
-    margin-top: 30px;
     background-color: #333;
     color: #fff;
+    width: 100%;
 }
 
-/* Basic Form Styling (can be expanded) */
-form div {
-    margin-bottom: 10px;
+/* Form Styling */
+form div.form-group { /* Add class for better targeting */
+    margin-bottom: 15px;
 }
 form label {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold;
 }
 form input[type="text"],
 form input[type="email"],
 form input[type="password"],
 form input[type="number"],
+form input[type="date"],
 form select,
 form textarea {
     width: 100%;
-    padding: 8px;
+    padding: 10px; /* Increased padding */
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box; /* So padding doesn't affect width */
 }
-form button {
+form textarea {
+    min-height: 80px;
+}
+form button[type="submit"], .btn { /* Style all buttons consistently */
     background: #333;
     color: #fff;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    text-decoration: none; /* For .btn used as links */
+    display: inline-block; /* For .btn used as links */
 }
-form button:hover {
+form button[type="submit"]:hover, .btn:hover {
     background: #555;
 }
+/* Specific button colors */
+.btn-primary { background-color: #0779e4; }
+.btn-primary:hover { background-color: #0056b3; }
+.btn-secondary { background-color: #6c757d; }
+.btn-secondary:hover { background-color: #545b62; }
+.btn-success { background-color: #28a745; }
+.btn-success:hover { background-color: #1e7e34; }
+.btn-danger { background-color: #dc3545; }
+.btn-danger:hover { background-color: #c82333; }
+.btn-info { background-color: #17a2b8; }
+.btn-info:hover { background-color: #117a8b; }
+.btn-sm { padding: 5px 10px; font-size: 0.9em; }
+
 
 /* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    margin-bottom: 20px;
 }
 th, td {
     text-align: left;
-    padding: 8px;
+    padding: 12px; /* Increased padding */
     border-bottom: 1px solid #ddd;
 }
 th {
     background-color: #f2f2f2;
+    font-weight: bold;
 }
 tr:hover {
     background-color: #f5f5f5;
 }
 
-/* Buttons */
-.btn {
-    display: inline-block;
-    padding: 8px 12px;
-    margin: 5px 0;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    color: white;
-    cursor: pointer;
+/* Utility Classes */
+.text-center { text-align: center; }
+.mt-1 { margin-top: 0.25rem; } .mt-2 { margin-top: 0.5rem; } .mt-3 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.25rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-3 { margin-bottom: 1rem; }
+.card { border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px; }
+.card-body { padding: 20px; }
+
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+    .navbar-toggler {
+        display: block; /* Show hamburger */
+    }
+    .navbar-collapse {
+        display: none; /* Hide menu by default */
+        width: 100%;
+        flex-direction: column; /* Stack links vertically */
+        position: absolute; /* Position for overlay effect */
+        top: 60px; /* Adjust based on navbar height */
+        left: 0;
+        background-color: #333;
+        padding: 1rem 0; /* Padding for collapsed menu */
+        z-index: 100; /* Ensure it's above other content */
+
+    }
+    .navbar-collapse.active {
+        display: flex; /* Show menu when active */
+    }
+    .nav-links {
+        flex-direction: column; /* Stack links vertically */
+        width: 100%;
+    }
+    .nav-links li {
+        margin-left: 0;
+        text-align: center; /* Center links */
+        width: 100%;
+    }
+    .nav-links a {
+        padding: 10px 0; /* Full width clickable area */
+        border-bottom: 1px solid #444; /* Separator for links */
+    }
+    .nav-links li:last-child a {
+        border-bottom: none;
+    }
+    .nav-user-info {
+        text-align: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #444;
+    }
+    .main-content, .container, .nav-container {
+        width: 95%; /* Use more screen width on mobile */
+    }
+}
+
+/* Social Login Separator and Buttons */
+.social-login-separator {
+    display: flex;
+    align-items: center;
     text-align: center;
+    margin: 1.5rem 0; /* Space above and below */
 }
-.btn-primary {
-    background-color: #0779e4;
+.social-login-separator::before,
+.social-login-separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ccc; /* Line color */
 }
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-.btn-secondary {
-    background-color: #6c757d;
-}
-.btn-secondary:hover {
-    background-color: #545b62;
-}
-.btn-danger {
-    background-color: #dc3545;
-}
-.btn-danger:hover {
-    background-color: #c82333;
-}
-.btn-sm {
-    padding: 5px 8px;
+.social-login-separator .separator-text {
+    padding: 0 1rem; /* Space around "OR" */
+    color: #666; /* Text color */
     font-size: 0.9em;
 }
 
-/* Utility Classes */
-.text-center {
-    text-align: center;
+.social-login-buttons {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 0.75rem; /* Space between buttons */
 }
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 1rem; }
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 1rem; }
 
-/* Specific page styles can be added below or in separate files */
+.social-btn {
+    padding: 0.75rem;
+    font-size: 1rem;
+    text-align: center;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #fff; /* Default text color for social buttons */
+    transition: opacity 0.2s ease-in-out;
+    display: block; /* Ensure it takes full width if .btn-block is used */
+}
+
+.social-btn:hover {
+    opacity: 0.9;
+    color: #fff; /* Ensure text color remains on hover */
+}
+
+.social-btn.google-btn {
+    background-color: #DB4437; /* Google Red */
+}
+.social-btn.google-btn:hover {
+    background-color: #c33d2e;
+}
+
+.social-btn.facebook-btn {
+    background-color: #4267B2; /* Facebook Blue */
+}
+.social-btn.facebook-btn:hover {
+    background-color: #365899;
+}
+
+.social-btn.apple-btn {
+    background-color: #000000; /* Apple Black */
+    color: #fff;
+}
+.social-btn.apple-btn:hover {
+    background-color: #333333;
+}
+
+/* Ensure .btn-block from previous styles applies if needed, or use width 100% */
+.social-btn.btn-block {
+    width: 100%;
+}
+
+/* Child Chore Viewing Page Styles */
+#my-chores-list .list-group-item {
+    display: flex;
+    flex-direction: column; /* Stack content vertically by default */
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    position: relative; /* For positioning button or status text */
+}
+
+#my-chores-list .list-group-item .d-flex.w-100.justify-content-between {
+    /* This is from the JS rendering, ensure it behaves well */
+    flex-wrap: wrap; /* Allow title and points to wrap if needed */
+}
+
+#my-chores-list .list-group-item h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    flex-grow: 1; /* Allow title to take available space */
+}
+
+#my-chores-list .list-group-item p.mb-1 { /* Description */
+    margin-bottom: 0.5rem !important; /* More space after description */
+    font-size: 0.95rem;
+    color: #555;
+}
+
+#my-chores-list .list-group-item small { /* Status, Due Date */
+    display: block; /* Each small on its own line for clarity */
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+#my-chores-list .list-group-item small.ml-2 { margin-left: 0 !important; } /* Override Bootstrap if it's there */
+
+#my-chores-list .list-group-item .mark-complete-btn {
+    margin-top: 0.75rem; /* Space above the button */
+    padding: 0.5rem 1rem; /* Make button larger */
+    width: 100%; /* Full width on mobile by default */
+}
+
+#my-chores-list .list-group-item .float-right.text-info,
+#my-chores-list .list-group-item .float-right.text-success {
+    display: block; /* Ensure it takes its own line */
+    text-align: right; /* Align to the right */
+    margin-top: 0.5rem;
+    font-style: italic;
+    width: 100%; /* Full width to ensure float behavior is contained or overridden */
+}
+
+
+/* Responsive adjustments for child chore list items */
+@media (min-width: 576px) { /* Small devices (tablets, landscape phones) */
+    #my-chores-list .list-group-item .mark-complete-btn {
+        width: auto; /* Auto width on larger screens */
+        position: absolute; /* Position it top-right */
+        top: 1rem;
+        right: 1rem;
+        margin-top: 0; /* Reset margin */
+    }
+    #my-chores-list .list-group-item .float-right.text-info,
+    #my-chores-list .list-group-item .float-right.text-success {
+         width: auto;
+         position: absolute;
+         top: 1rem;
+         right: 1rem;
+         margin-top: 0;
+    }
+
+    #my-chores-list .list-group-item h5 {
+        margin-right: 150px; /* Space for the button/status text on the right */
+    }
+}
+
+@media (max-width: 768px) { /* General mobile styles if needed beyond the above */
+    #my-chores-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #my-chores-list .list-group-item h5 {
+        font-size: 1.1rem;
+    }
+     #my-chores-list .list-group-item p.mb-1 {
+        font-size: 0.9rem;
+    }
+    #my-chores-list .list-group-item small {
+        font-size: 0.85rem;
+    }
+}
+
+/* Specific page styles from previous merge (check for redundancy or keep if needed) */
 .dashboard-sections {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
 }
 .dashboard-section {
-    flex: 1;
-    min-width: 280px; /* Ensure sections don't get too squished */
+    flex: 1 1 300px; /* Flex grow, shrink, basis */
     padding: 15px;
     background-color: #f9f9f9;
     border: 1px solid #eee;
@@ -260,56 +466,611 @@ tr:hover {
 .dashboard-section ul li:last-child {
     border-bottom: none;
 }
-body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
-}
 
-.container {
-    width: 80%;
-    margin: auto;
-    overflow: hidden;
-    padding: 20px;
+/* Parent Redemption Processing Page Styles */
+#redemption-requests-list .list-group-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-header {
-    background: #333;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-    border-bottom: #0779e4 3px solid;
+#redemption-requests-list .list-group-item h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
 }
 
-header h1 {
-    margin: 0;
+#redemption-requests-list .list-group-item p {
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: #555;
 }
-
-nav ul {
-    padding: 0;
-    list-style: none;
-    text-align: center;
-}
-
-nav ul li {
-    display: inline;
-    margin-right: 20px;
-}
-
-nav ul li a {
-    color: #fff;
-    text-decoration: none;
-}
-
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 20px;
+#redemption-requests-list .list-group-item p strong { /* For Status */
     color: #333;
-    background-color: #e2e2e2;
+}
+
+#redemption-requests-list .list-group-item small { /* For Timestamps */
+    font-size: 0.85rem;
+    color: #777;
+    display: block; /* Ensure they take their own line if needed */
+    margin-top: 0.25rem;
+}
+
+#redemption-requests-list .redemption-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 0.5rem; 
+}
+
+#redemption-requests-list .redemption-actions .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    flex-grow: 1; 
+    min-width: 80px; 
+}
+
+
+/* Responsive adjustments for redemption requests list */
+@media (max-width: 768px) {
+    #redemption-requests-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #redemption-requests-list .list-group-item h5 {
+        font-size: 1.05rem;
+    }
+    #redemption-requests-list .list-group-item p {
+        font-size: 0.9rem;
+    }
+    #redemption-requests-list .list-group-item small {
+        font-size: 0.8rem;
+    }
+
+    #redemption-requests-list .redemption-actions {
+        flex-direction: column; 
+    }
+    #redemption-requests-list .redemption-actions .btn {
+        width: 100%; 
+        margin-bottom: 0.5rem; 
+    }
+    #redemption-requests-list .redemption-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Child Rewards Page Styles (#child_rewards.html) */
+/* Using .row and .col-md-6 from Bootstrap-like naming for layout */
+/* The .row class would typically be display: flex; flex-wrap: wrap; */
+/* The .col-md-6 would be flex: 0 0 50%; max-width: 50%; on medium screens and up */
+/* And width: 100% on smaller screens */
+
+/* Assuming .row and .col-md-6 are already defined or we add basic flexbox for them */
+/* If not already defined, add: */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -15px; /* Gutters, adjust as needed */
+    margin-right: -15px;
+}
+.col-md-6 {
+    position: relative;
+    width: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+@media (min-width: 768px) { /* md breakpoint */
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+
+#available-rewards-list .list-group-item,
+#my-redemption-history-list .list-group-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    position: relative; /* For redeem button or status text positioning */
+}
+
+#available-rewards-list .list-group-item h5,
+#my-redemption-history-list .list-group-item h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+}
+
+#available-rewards-list .list-group-item p,
+#my-redemption-history-list .list-group-item p {
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+#available-rewards-list .list-group-item p strong,
+#my-redemption-history-list .list-group-item p strong {
+    color: #333;
+}
+
+#available-rewards-list .list-group-item small, /* For availability/stock */
+#my-redemption-history-list .list-group-item small { /* For timestamps */
+    font-size: 0.85rem;
+    color: #777;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+#available-rewards-list .list-group-item .redeem-reward-btn {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem; 
+    width: 100%; /* Full width on mobile by default */
+}
+#available-rewards-list .list-group-item .btn[disabled] {
+    background-color: #6c757d; /* Bootstrap's secondary color for disabled */
+    cursor: not-allowed;
+}
+
+
+/* Responsive adjustments for child rewards page */
+@media (min-width: 576px) { /* Small devices and up */
+    #available-rewards-list .list-group-item .redeem-reward-btn {
+        width: auto; /* Auto width on larger screens */
+        position: absolute; 
+        top: 1rem;
+        right: 1rem;
+        margin-top: 0; 
+    }
+     #available-rewards-list .list-group-item h5 {
+        margin-right: 100px; /* Space for the button */
+    }
+}
+
+@media (max-width: 768px) { /* Stack columns on smaller screens */
+    /* .col-md-6 will automatically be width: 100% if using typical grid system. 
+       If using custom flex, ensure they stack.
+       The .row with flex-wrap: wrap already handles this.
+    */
+    #available-rewards-list .list-group-item,
+    #my-redemption-history-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #available-rewards-list .list-group-item h5,
+    #my-redemption-history-list .list-group-item h5 {
+        font-size: 1.05rem;
+    }
+    #available-rewards-list .list-group-item p,
+    #my-redemption-history-list .list-group-item p {
+        font-size: 0.9rem;
+    }
+    #available-rewards-list .list-group-item small,
+    #my-redemption-history-list .list-group-item small {
+        font-size: 0.8rem;
+    }
+}
+
+
+/* Child Behavior Log Page Styles (#child_history.html) */
+#my-behavior-log-list .list-group-item {
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #fff;
+}
+
+#my-behavior-log-list .list-group-item h5 { /* Behavior Type */
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+}
+/* Specific styling for behavior type text (positive/negative) is already handled by text-success/text-danger in JS */
+
+#my-behavior-log-list .list-group-item p { /* Description, Points Change */
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+#my-behavior-log-list .list-group-item p strong {
+    color: #333;
+}
+/* Specific styling for points_change text (positive/negative) is already handled by text-success/text-danger in JS */
+
+
+#my-behavior-log-list .list-group-item small { /* Timestamp/recorder info */
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 0.5rem;
+}
+
+/* Responsive adjustments for child behavior log list */
+@media (max-width: 768px) {
+    #my-behavior-log-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #my-behavior-log-list .list-group-item h5 {
+        font-size: 1.05rem;
+    }
+    #my-behavior-log-list .list-group-item p {
+        font-size: 0.9rem;
+    }
+    #my-behavior-log-list .list-group-item small {
+        font-size: 0.8rem;
+    }
+}
+
+
+/* Parent Rewards Management Page Styles */
+#rewards-list .list-group-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #fff;
+}
+
+#rewards-list .list-group-item h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+#rewards-list .list-group-item p {
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+#rewards-list .list-group-item p strong { /* For Availability status */
+    color: #333;
+}
+#rewards-list .list-group-item small { /* For stock quantity if used */
+    font-size: 0.9rem;
+    color: #666;
+}
+
+
+#rewards-list .reward-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 0.5rem; 
+}
+
+#rewards-list .reward-actions .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    flex-grow: 1; 
+    min-width: 70px; /* Slightly smaller min-width for Edit/Delete */
+}
+
+
+/* Responsive adjustments for rewards list */
+@media (max-width: 768px) {
+    #rewards-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #rewards-list .list-group-item h5 {
+        font-size: 1.1rem;
+    }
+    #rewards-list .list-group-item p {
+        font-size: 0.9rem;
+    }
+
+    #rewards-list .reward-actions {
+        flex-direction: column; 
+    }
+    #rewards-list .reward-actions .btn {
+        width: 100%; 
+        margin-bottom: 0.5rem; 
+    }
+    #rewards-list .reward-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Ensure the main "Add New Reward" button is responsive if needed */
+#add-new-reward-btn {
+    /* display: block; */ /* If it needs to be full width on mobile */
+    /* width: 100%; */
+    /* margin-bottom: 1rem; */
+}
+
+/* Ensure form elements within reward forms are responsive (mostly handled globally) */
+#create-reward-form .form-group,
+#edit-reward-form .form-group {
+    /* Global .form-group styles apply */
+}
+#reward-availability, #edit-reward-availability,
+#reward-stock-quantity, #edit-reward-stock-quantity {
+    /* Global form input/select styles apply */
+}
+
+
+/* Modal Styling from parent_manage_chores.html (can be moved here) */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1000; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 90%; 
+  max-width: 600px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.close-btn {
+  color: #aaa;
+  float: right; /* Keep for older layout, but consider flex on header */
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute; /* Position relative to modal-content */
+  top: 10px;
+  right: 20px;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Ensure list items in chore/reward lists have some space */
+.list-group-item {
+    margin-bottom: 10px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.list-group-item h5 {
+    margin-bottom: 0.5rem;
+}
+.list-group-item p {
+    margin-bottom: 0.25rem;
+}
+.list-group-item small {
+    display: inline-block; /* Allow margin/padding */
+    margin-right: 10px;
+}
+.float-right { /* Utility for buttons inside list items */
+    float: right;
+}
+/* Clearfix for floated elements if any parent needs it */
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+/* Parent Chore Management Page Styles */
+#create-chore-form-container, 
+#editChoreModal .modal-content { /* Apply to both create form and edit modal */
+    /* max-width: 600px; already in .modal-content, ensure create-form has it too if needed */
+    /* margin: 1rem auto; /* Centering for the create form if it's not full width */
+}
+
+#chores-list .list-group-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #fff;
+}
+
+#chores-list .list-group-item h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+#chores-list .list-group-item p {
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+#chores-list .list-group-item p strong {
+    color: #333;
+}
+
+
+#chores-list .chore-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+    gap: 0.5rem; /* Space between buttons */
+}
+
+#chores-list .chore-actions .btn {
+    padding: 0.375rem 0.75rem; /* Standard button padding */
+    font-size: 0.875rem;
+    flex-grow: 1; /* Allow buttons to grow and fill space if fewer */
+    min-width: 80px; /* Minimum width before wrapping/shrinking */
+}
+
+
+/* Responsive adjustments for chore list and forms */
+@media (max-width: 768px) {
+    #create-chore-form-container {
+        margin: 1rem 0; /* Full width on smaller screens */
+    }
+
+    #chores-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #chores-list .list-group-item h5 {
+        font-size: 1.1rem;
+    }
+    #chores-list .list-group-item p {
+        font-size: 0.9rem;
+    }
+
+    #chores-list .chore-actions {
+        flex-direction: column; /* Stack buttons vertically */
+    }
+    #chores-list .chore-actions .btn {
+        width: 100%; /* Make buttons full width when stacked */
+        margin-bottom: 0.5rem; /* Space between stacked buttons */
+    }
+    #chores-list .chore-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Ensure the main "Add New Chore" button is responsive if needed */
+#add-new-chore-btn {
+    /* display: block; */ /* If it needs to be full width on mobile */
+    /* width: 100%; */
+    /* margin-bottom: 1rem; */
+}
+
+
+/* Parent Behavior Log Page Styles */
+#log-behavior-form .form-group {
+    /* Existing form-group styles should apply. Add specific tweaks if needed */
+}
+
+#behavior-log-list .list-group-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    background-color: #fff;
+}
+
+#behavior-log-list .list-group-item h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem; /* Slightly smaller than chore title */
+}
+#behavior-log-list .list-group-item .text-success { /* For positive behavior type/points */
+    color: #28a745 !important; /* Ensure override if needed */
+    font-weight: bold;
+}
+#behavior-log-list .list-group-item .text-danger { /* For negative behavior type/points */
+    color: #dc3545 !important; /* Ensure override if needed */
+    font-weight: bold;
+}
+
+
+#behavior-log-list .list-group-item p {
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+#behavior-log-list .list-group-item p strong {
+    color: #333;
+}
+
+#behavior-log-list .list-group-item small { /* Timestamp/recorder info */
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 0.5rem;
+}
+
+/* Responsive adjustments for behavior log list */
+@media (max-width: 768px) {
+    #behavior-log-list .list-group-item {
+        padding: 0.75rem;
+    }
+    #behavior-log-list .list-group-item h5 {
+        font-size: 1.05rem;
+    }
+    #behavior-log-list .list-group-item p {
+        font-size: 0.9rem;
+    }
+    #behavior-log-list .list-group-item small {
+        font-size: 0.8rem;
+    }
+}
+
+
+/* Authentication Form Styling */
+.auth-form-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 25px; /* Slightly more padding */
+    background-color: #fff; /* Ensure it stands out from body bg */
+    border: 1px solid #ddd; /* Softer border */
+    border-radius: 8px; /* More rounded corners */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+.auth-form-container .page-header h1 {
+    text-align: center; /* Center form titles */
+    margin-bottom: 1.5rem;
+    border-bottom: none; /* Remove default page-header border if not desired here */
+}
+
+.auth-form-container .form-group {
+    margin-bottom: 1rem; /* Consistent spacing */
+}
+
+.auth-form-container label {
+    display: block;
+    margin-bottom: 0.5rem; /* Space between label and input */
+    font-weight: bold;
+}
+
+.auth-form-container input[type="text"],
+.auth-form-container input[type="email"],
+.auth-form-container input[type="password"] {
+    width: 100%;
+    padding: 0.75rem; /* Good padding for touch */
+    border: 1px solid #ccc; /* Clearer border */
+    border-radius: 4px;
+    font-size: 1rem; /* Ensure readability */
+}
+
+.auth-form-container button[type="submit"].btn-block { /* Specific for full-width buttons */
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    margin-top: 1rem; /* Space above button */
+}
+
+.auth-form-container .alert { /* Style for messages inside the form container */
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive adjustments for auth forms */
+@media (max-width: 600px) {
+    .auth-form-container {
+        width: 90%; /* More width on small screens */
+        margin: 1rem auto;
+        padding: 20px;
+    }
+
+    .auth-form-container input[type="text"],
+    .auth-form-container input[type="email"],
+    .auth-form-container input[type="password"] {
+        padding: 0.65rem; /* Slightly adjust padding if needed */
+        font-size: 0.95rem;
+    }
+
+    .auth-form-container button[type="submit"].btn-block {
+        padding: 0.65rem;
+        font-size: 1rem;
+    }
 }

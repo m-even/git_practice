@@ -2,35 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> {# Ensured viewport meta tag #}
     <title>{% block title %}Family Chore & Reward App{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <header>
-        <nav class="navbar">
-            <div class="nav-container">
-                <a class="nav-brand" href="{{ url_for('main.index') }}">FamilyApp</a>
-                <ul class="nav-links">
-                    {% if current_user.is_authenticated %}
-                        {% if current_user.role == 'parent' %}
-                            <li><span class="nav-user-info">Parent: {{ current_user.username }}</span></li>
-                            <li><a href="{{ url_for('main.parent_dashboard') }}">Dashboard</a></li>
-                            <li><a href="{{ url_for('main.parent_chores_view') }}">Chores</a></li>
-                            <li><a href="{{ url_for('main.parent_log_behavior_view') }}">Log Behavior</a></li>
-                            <li><a href="{{ url_for('main.parent_rewards_view') }}">Rewards</a></li>
-                            <li><a href="{{ url_for('main.parent_children_view') }}">Children</a></li>
-                            <li><a href="{{ url_for('main.logout_view') }}">Logout</a></li>
-                        {% elif current_user.role == 'child' %}
-                            <li><span class="nav-user-info">Child: {{ current_user.username }} (Points: {{ current_user.current_points_balance }})</span></li>
-                            <li><a href="{{ url_for('main.child_chores_view') }}">My Chores</a></li>
-                            <li><a href="{{ url_for('main.child_rewards_view') }}">Rewards</a></li>
-                            <li><a href="{{ url_for('main.child_history_view') }}">History</a></li>
-                            <li><a href="{{ url_for('main.logout_view') }}">Logout</a></li>
+        <div class="nav-container"> {# Moved nav-container to wrap the whole navbar for better control #}
+            <nav class="navbar">
+                <a href="{{ url_for('main.index') }}" class="navbar-brand">FamilyApp</a>
+                <button class="navbar-toggler" aria-label="Toggle navigation">&#9776;</button>
+                <div class="navbar-collapse" id="navbarMenu">
+                    <ul class="nav-links">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.role == 'parent' %}
+                                <li><span class="nav-user-info">Parent: {{ current_user.username }}</span></li>
+                                <li><a href="{{ url_for('main.parent_dashboard') }}">Dashboard</a></li>
+                                <li><a href="{{ url_for('main.parent_chores_view') }}">Chores</a></li>
+                                <li><a href="{{ url_for('main.parent_log_behavior_view') }}">Log Behavior</a></li>
+                                <li><a href="{{ url_for('main.parent_rewards_view') }}">Rewards</a></li>
+                                <li><a href="{{ url_for('main.parent_children_view') }}">Children</a></li>
+                                <li><a href="{{ url_for('main.logout_view') }}">Logout</a></li>
+                            {% elif current_user.role == 'child' %}
+                                <li><span class="nav-user-info">Child: {{ current_user.username }} (Points: {{ current_user.current_points_balance }})</span></li>
+                                <li><a href="{{ url_for('main.child_chores_view') }}">My Chores</a></li>
+                                <li><a href="{{ url_for('main.child_rewards_view') }}">Rewards</a></li>
+                                <li><a href="{{ url_for('main.child_history_view') }}">History</a></li>
+                                <li><a href="{{ url_for('main.logout_view') }}">Logout</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li><a href="{{ url_for('main.login_view') }}">Login</a></li>
+                            <li><a href="{{ url_for('main.register_view') }}">Register</a></li>
                         {% endif %}
-                    {% else %}
-                        <li><a href="{{ url_for('main.login_view') }}">Login</a></li>
-                        <li><a href="{{ url_for('main.register_view') }}">Register</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container main-content"> {# Added main-content class for potential flex styling #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flashes">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="footer-content"> {# Added footer-content class #}
+        <p>&copy; 2024 Family Chore & Reward App</p>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script> 
+    <script src="{{ url_for('static', filename='js/main_layout.js') }}" defer></script> {# Added main_layout.js #}
+</body>
+</html>
                     {% endif %}
                 </ul>
             </div>

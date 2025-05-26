@@ -5,3 +5,6 @@ Flask-Login
 Flask-WTF
 python-dotenv
 bcrypt
+Flask-Dance
+gunicorn
+whitenoise
