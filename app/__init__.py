@@ -8,14 +8,25 @@ import os
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
-login_manager.login_view = 'login' # The name of the route for logging in
+login_manager.login_view = 'main.login' # The name of the route for logging in
 
 def create_app(config_class=Config):
+    from flask import jsonify, request # Add request import
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        # Check if the request is for an API endpoint
+        # This condition might need adjustment based on how API routes are structured
+        if request.blueprint == 'main' and request.path.startswith('/api/'):
+            return jsonify(error="Unauthorized", message="Authentication is required to access this resource."), 401
+        # For non-API routes, redirect to login page
+        return redirect(url_for(login_manager.login_view, next=request.url))
+
     login_manager.init_app(app)
 
     from flask_dance.contrib.google import make_google_blueprint
@@ -54,5 +65,8 @@ def create_app(config_class=Config):
     # Add prefix for static files if they are served under /static/
     # Example: app.wsgi_app.add_files(app.static_folder, prefix='static/')
     # This is often handled by Flask's static_url_path, WhiteNoise respects this.
+
+    # Add redirect import
+    from flask import redirect, url_for
 
     return app

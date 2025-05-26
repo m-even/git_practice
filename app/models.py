@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     children = db.relationship('User',
                                backref=db.backref('parent', remote_side=[id]),
                                lazy='dynamic')
+    social_accounts = db.relationship('SocialAccount', back_populates='user', lazy='dynamic', cascade="all, delete-orphan")
     
     # For child users
     current_points_balance = db.Column(db.Integer, default=0)
@@ -108,7 +109,6 @@ class Reward(db.Model):
     # This would require a secondary association table 'reward_claims'. For now, keeping it simple as per task.
 
     # Removed social_provider and social_id fields
-    social_accounts = db.relationship('SocialAccount', back_populates='user', lazy='dynamic', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<Reward {self.name} - Cost: {self.point_cost}>'

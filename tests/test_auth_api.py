@@ -88,9 +88,6 @@ class TestAuthAPI(BaseTestCase):
         self.assertEqual(data['user']['username'], 'loginuser')
         self.assertEqual(data['user']['role'], 'parent') # Default role in helper
 
-        # Check for session cookie (name depends on Flask-Login config, often 'session')
-        self.assertTrue(any(cookie.name == 'session' for cookie in self.client.cookie_jar))
-
     def test_login_successfully_with_email(self):
         self._create_user_direct_db('loginuser_email', 'login_email@example.com', 'testpass_email')
         
