@@ -109,3 +109,26 @@ class Reward(db.Model):
 
     def __repr__(self):
         return f'<Reward {self.name} - Cost: {self.point_cost}>'
+
+class RewardRedemptionLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    child_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    reward_id = db.Column(db.Integer, db.ForeignKey('reward.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # Parent of the child
+    
+    points_at_redemption = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(30), nullable=False, default="pending_approval") # "pending_approval", "approved", "rejected"
+    
+    timestamp_requested = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    timestamp_processed = db.Column(db.DateTime, nullable=True) # When parent approved/rejected
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    child = db.relationship('User', foreign_keys=[child_id], backref=db.backref('reward_redemptions', lazy='dynamic'))
+    reward = db.relationship('Reward', foreign_keys=[reward_id], backref=db.backref('redemption_logs', lazy='dynamic'))
+    parent = db.relationship('User', foreign_keys=[parent_id], backref=db.backref('child_redemption_requests', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<RewardRedemptionLog {self.id} - Child {self.child_id} - Reward {self.reward_id} - Status {self.status}>'

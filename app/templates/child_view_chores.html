@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}My Chores - Child{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Chores</h1>
+    <p>Hello, {{ current_user.username }}! Here are your assigned chores. Your current balance is: <strong>{{ current_user.current_points_balance }} points</strong>.</p>
+</div>
+
+<div id="message-area-child-chores" class="mb-3"></div>
+
+<div id="my-chores-list">
+    <p>Loading your chores...</p>
+</div>
+
+{# Include the specific JavaScript for this page #}
+<script src="{{ url_for('static', filename='js/child_chores.js') }}" defer></script>
+{% endblock %}

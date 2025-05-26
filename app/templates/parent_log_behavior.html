@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Log Behavior - Parent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Log Child Behavior</h1>
+</div>
+
+<div id="message-area-behavior" class="mb-3"></div>
+
+<div class="card card-body mb-4">
+    <h2>Log New Behavior</h2>
+    <form id="log-behavior-form">
+        <div class="form-group">
+            <label for="behavior-child-select">Select Child:</label>
+            <select id="behavior-child-select" name="child_id" class="form-control" required>
+                <option value="">-- Select Child --</option>
+                {# Children will be populated by JavaScript #}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="behavior-type">Behavior Type:</label>
+            <select id="behavior-type" name="behavior_type" class="form-control" required>
+                <option value="positive">Positive</option>
+                <option value="negative">Negative</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="behavior-description">Description:</label>
+            <textarea id="behavior-description" name="description" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="behavior-points">Points Change:</label>
+            <input type="number" id="behavior-points" name="points_change" class="form-control" required
+                   title="Enter a positive number for positive behavior, a negative number for negative behavior.">
+            <small class="form-text text-muted">Positive for good behavior (e.g., 5), negative for misbehavior (e.g., -5).</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Behavior Log</button>
+    </form>
+</div>
+
+<h2>Behavior Log History</h2>
+<div id="behavior-log-list">
+    <p>Loading behavior history...</p>
+</div>
+
+{# Include the specific JavaScript for this page #}
+<script src="{{ url_for('static', filename='js/parent_behavior.js') }}" defer></script>
+{% endblock %}

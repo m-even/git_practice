@@ -1,17 +1,119 @@
-from flask import render_template, current_app, request, jsonify
+from flask import render_template, current_app, request, jsonify, flash, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
-from app.models import User
+from app.models import User, Chore, BehaviorLog, Reward, RewardRedemptionLog # Import all models
 from app.main import bp # Import the blueprint
+from datetime import datetime # Ensure datetime is imported
+
+# --- Page Routes (Frontend Views) ---
 
 @bp.route('/')
 @bp.route('/index')
 def index():
-    # Check if a user is logged in and pass that information to the template
-    user_info = None
+    # current_user is automatically available in templates if LoginManager is configured
+    return render_template('index.html', title='Home')
+
+@bp.route('/login', methods=['GET', 'POST']) # Renamed to login_view
+def login_view():
     if current_user.is_authenticated:
-        user_info = {'username': current_user.username, 'role': current_user.role}
-    return render_template('index.html', title='Home', user_info=user_info)
+        return redirect(url_for('main.index'))
+    # For simplicity, we are not implementing WTForms here, API is primary for form handling
+    # This page would ideally have a form that POSTs to /api/login
+    return render_template('login.html', title='Login')
+
+@bp.route('/register', methods=['GET', 'POST']) # Renamed to register_view
+def register_view():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    # This page would ideally have a form that POSTs to /api/register
+    return render_template('register.html', title='Register')
+
+@bp.route('/logout') # Renamed to logout_view
+@login_required
+def logout_view():
+    # The actual logout logic is handled by the API, this is just a view if needed
+    # Or, it can directly call the API logout and then redirect
+    logout_user() # Assuming direct logout from Flask-Login for web context
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('main.index'))
+
+# Parent Routes
+@bp.route('/parent/dashboard')
+@login_required
+def parent_dashboard():
+    if current_user.role != 'parent':
+        flash('Access denied: Parent role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('parent_dashboard.html', title='Parent Dashboard')
+
+@bp.route('/parent/chores')
+@login_required
+def parent_chores_view():
+    if current_user.role != 'parent':
+        flash('Access denied: Parent role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('parent_manage_chores.html', title='Manage Chores')
+
+@bp.route('/parent/log_behavior')
+@login_required
+def parent_log_behavior_view():
+    if current_user.role != 'parent':
+        flash('Access denied: Parent role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('parent_log_behavior.html', title='Log Behavior')
+
+@bp.route('/parent/rewards')
+@login_required
+def parent_rewards_view():
+    if current_user.role != 'parent':
+        flash('Access denied: Parent role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('parent_rewards.html', title='Manage Rewards')
+
+@bp.route('/parent/children')
+@login_required
+def parent_children_view():
+    if current_user.role != 'parent':
+        flash('Access denied: Parent role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('parent_children.html', title='Manage Children')
+
+@bp.route('/parent/redemptions')
+@login_required
+def parent_process_redemptions_view():
+    if current_user.role != 'parent':
+        flash('Access denied: Parent role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('parent_process_redemptions.html', title='Process Redemptions')
+
+# Child Routes
+@bp.route('/child/chores')
+@login_required
+def child_chores_view():
+    if current_user.role != 'child':
+        flash('Access denied: Child role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('child_view_chores.html', title='My Chores')
+
+@bp.route('/child/rewards')
+@login_required
+def child_rewards_view():
+    if current_user.role != 'child':
+        flash('Access denied: Child role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('child_rewards.html', title='Available Rewards')
+
+@bp.route('/child/history')
+@login_required
+def child_history_view():
+    if current_user.role != 'child':
+        flash('Access denied: Child role required.', 'danger')
+        return redirect(url_for('main.index'))
+    return render_template('child_history.html', title='My History')
+
+
+# --- API Routes (Backend Logic) ---
+# (Existing API routes remain below this section)
 
 @bp.route('/api/register', methods=['POST'])
 def register():
@@ -471,6 +573,16 @@ def record_behavior():
         "child_new_balance": child.current_points_balance
     }), 201
 
+@bp.route('/api/parent/children', methods=['GET'])
+@login_required
+def list_parent_children():
+    if current_user.role != 'parent':
+        return jsonify({"error": "Unauthorized. Only parents can view this list."}), 403
+    
+    children = User.query.filter_by(parent_id=current_user.id).all()
+    children_data = [{"id": child.id, "username": child.username} for child in children]
+    return jsonify(children_data), 200
+
 @bp.route('/api/behaviors', methods=['GET']) # For parents to list behavior logs they recorded
 @login_required
 def list_parent_behavior_logs():
@@ -718,6 +830,196 @@ def list_available_rewards():
     serialized_rewards = [serialize_reward(reward, user_role=current_user.role) for reward in rewards]
     
     return jsonify(serialized_rewards), 200
+
+# Helper function for reward redemption log serialization
+def serialize_redemption_log(log, user_role="parent"): # user_role for context
+    data = {
+        "id": log.id,
+        "child_id": log.child_id,
+        "reward_id": log.reward_id,
+        "parent_id": log.parent_id, # Parent might want to see this
+        "points_at_redemption": log.points_at_redemption,
+        "status": log.status,
+        "timestamp_requested": log.timestamp_requested.isoformat(),
+        "timestamp_processed": log.timestamp_processed.isoformat() if log.timestamp_processed else None,
+        "created_at": log.created_at.isoformat()
+    }
+    if log.child:
+        data["child_username"] = log.child.username
+    if log.reward:
+        data["reward_name"] = log.reward.name
+    if user_role == "parent" and log.parent: # May not always be needed if parent is current_user
+        data["parent_username"] = log.parent.username
+    return data
+
+@bp.route('/api/child/rewards/<int:reward_id>/redeem', methods=['POST'])
+@login_required
+def child_request_redemption(reward_id):
+    if current_user.role != 'child':
+        return jsonify({"error": "Unauthorized. Only children can request rewards."}), 403
+
+    if not current_user.parent_id:
+        return jsonify({"error": "Child account not linked to a parent."}), 400
+
+    reward = Reward.query.get(reward_id)
+
+    if not reward:
+        return jsonify({"error": "Reward not found."}), 404
+    
+    if reward.created_by_parent_id != current_user.parent_id:
+        return jsonify({"error": "This reward is not available to you."}), 403
+
+    if reward.availability != "available":
+        return jsonify({"error": f"Reward '{reward.name}' is currently unavailable."}), 400
+    
+    if current_user.current_points_balance < reward.point_cost:
+        return jsonify({"error": "Not enough points to redeem this reward."}), 400
+
+    if reward.availability == "limited_stock": # This check is technically redundant if availability is 'available'
+        if reward.stock_quantity is None or reward.stock_quantity <= 0:
+            return jsonify({"error": f"Reward '{reward.name}' is out of stock."}), 400
+    
+    # Check if there's already a pending request for this reward by this child
+    existing_pending_request = RewardRedemptionLog.query.filter_by(
+        child_id=current_user.id,
+        reward_id=reward.id,
+        status="pending_approval"
+    ).first()
+    if existing_pending_request:
+        return jsonify({"error": "You already have a pending request for this reward."}), 409
+
+
+    redemption_log = RewardRedemptionLog(
+        child_id=current_user.id,
+        reward_id=reward.id,
+        parent_id=current_user.parent_id,
+        points_at_redemption=reward.point_cost,
+        status="pending_approval"
+        # timestamp_requested and created_at will use default values
+    )
+
+    db.session.add(redemption_log)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Reward redemption requested successfully. Waiting for parent approval.",
+        "redemption_request": serialize_redemption_log(redemption_log, user_role="child")
+    }), 201
+
+@bp.route('/api/parent/redemptions/<int:redemption_id>/process', methods=['PATCH'])
+@login_required
+def parent_process_redemption(redemption_id):
+    if current_user.role != 'parent':
+        return jsonify({"error": "Unauthorized. Only parents can process redemptions."}), 403
+
+    redemption_log = RewardRedemptionLog.query.get_or_404(redemption_id)
+
+    if redemption_log.parent_id != current_user.id:
+        return jsonify({"error": "Forbidden. This redemption request is not for your child."}), 403
+
+    if redemption_log.status != "pending_approval":
+        return jsonify({"error": f"Cannot process redemption. Current status is '{redemption_log.status}'."}), 409
+
+    data = request.get_json()
+    if not data or 'action' not in data:
+        return jsonify({"error": "Missing 'action' in request body."}), 400
+
+    action = data['action'].lower()
+
+    if action not in ["approve", "reject"]:
+        return jsonify({"error": "Invalid action. Must be 'approve' or 'reject'."}), 400
+
+    child_user = User.query.get(redemption_log.child_id)
+    reward = Reward.query.get(redemption_log.reward_id)
+
+    if not child_user or not reward:
+        # Should not happen if DB integrity is maintained
+        return jsonify({"error": "Child or Reward associated with this redemption not found."}), 500
+
+    if action == "approve":
+        if child_user.current_points_balance < redemption_log.points_at_redemption:
+            # Child no longer has enough points, parent might reject or it's an issue to resolve
+            redemption_log.status = "rejected" # Auto-reject if points are insufficient
+            redemption_log.timestamp_processed = datetime.utcnow()
+            db.session.commit()
+            return jsonify({
+                "error": "Child no longer has enough points. Redemption automatically rejected.",
+                "redemption_log": serialize_redemption_log(redemption_log, user_role="parent")
+            }), 409 # Conflict or Bad Request
+
+        if reward.availability != "available":
+            return jsonify({"error": f"Reward '{reward.name}' is currently unavailable."}), 400
+
+        if reward.availability == "limited_stock":
+            if reward.stock_quantity is None or reward.stock_quantity <= 0:
+                return jsonify({"error": f"Reward '{reward.name}' is out of stock."}), 400
+            reward.stock_quantity -= 1
+        
+        child_user.current_points_balance -= redemption_log.points_at_redemption
+        redemption_log.status = "approved"
+    
+    elif action == "reject":
+        redemption_log.status = "rejected"
+
+    redemption_log.timestamp_processed = datetime.utcnow()
+    
+    db.session.add(child_user) # ensure changes to child are staged
+    db.session.add(reward) # ensure changes to reward are staged
+    db.session.commit()
+
+    return jsonify({
+        "message": f"Redemption request {action}d successfully.",
+        "redemption_log": serialize_redemption_log(redemption_log, user_role="parent"),
+        "child_new_balance": child_user.current_points_balance,
+        "reward_new_stock": reward.stock_quantity if reward.availability == "limited_stock" else None
+    }), 200
+
+@bp.route('/api/redemptions', methods=['GET']) # For parents to list all redemption logs for their children
+@login_required
+def list_parent_redemption_logs():
+    if current_user.role != 'parent':
+        return jsonify({"error": "Unauthorized. Only parents can view this list."}), 403
+
+    query = RewardRedemptionLog.query.filter_by(parent_id=current_user.id)
+    
+    status_filter = request.args.get('status')
+    child_id_filter = request.args.get('child_id')
+
+    if status_filter:
+        if status_filter not in ["pending_approval", "approved", "rejected"]:
+             return jsonify({"error": "Invalid status filter."}), 400
+        query = query.filter(RewardRedemptionLog.status == status_filter)
+
+    if child_id_filter:
+        try:
+            child_id_int = int(child_id_filter)
+            # Verify the child belongs to the parent
+            child = User.query.filter_by(id=child_id_int, parent_id=current_user.id).first()
+            if not child:
+                return jsonify({"error": "Invalid child_id specified or child does not belong to this parent."}), 400
+            query = query.filter(RewardRedemptionLog.child_id == child_id_int)
+        except ValueError:
+            return jsonify({"error": "Invalid child_id format."}), 400
+
+    logs = query.order_by(RewardRedemptionLog.timestamp_requested.desc()).all()
+    return jsonify([serialize_redemption_log(log, user_role="parent") for log in logs]), 200
+
+@bp.route('/api/child/redemptions', methods=['GET']) # For children to list their own redemption logs
+@login_required
+def list_child_redemption_logs():
+    if current_user.role != 'child':
+        return jsonify({"error": "Unauthorized. Only children can view this list."}), 403
+
+    query = RewardRedemptionLog.query.filter_by(child_id=current_user.id)
+    
+    status_filter = request.args.get('status')
+    if status_filter:
+        if status_filter not in ["pending_approval", "approved", "rejected"]:
+             return jsonify({"error": "Invalid status filter."}), 400
+        query = query.filter(RewardRedemptionLog.status == status_filter)
+
+    logs = query.order_by(RewardRedemptionLog.timestamp_requested.desc()).all()
+    return jsonify([serialize_redemption_log(log, user_role="child") for log in logs]), 200
 
 
 from datetime import datetime

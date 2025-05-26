@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}My Behavior History - Child{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Behavior History</h1>
+    <p>Hello, {{ current_user.username }}! Here is a log of your recorded behaviors.</p>
+</div>
+
+<div id="message-area-child-behavior" class="mb-3"></div>
+
+<div id="my-behavior-log-list">
+    <p>Loading your behavior history...</p>
+</div>
+
+{# Include the specific JavaScript for this page #}
+<script src="{{ url_for('static', filename='js/child_behavior.js') }}" defer></script>
+{% endblock %}

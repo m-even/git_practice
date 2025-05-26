@@ -1,9 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Home - My Flask App{% endblock %}
+{% block title %}Home - Family Chore & Reward App{% endblock %}
 
 {% block content %}
-    <h1>Welcome to My Flask App!</h1>
-    <p>This is the homepage of your new Flask application.</p>
-    <p>Feel free to customize this page and add more features.</p>
+    <div class="page-header">
+        {% if current_user.is_authenticated %}
+            <h1>Welcome back, {{ current_user.username }}!</h1>
+        {% else %}
+            <h1>Welcome to the Family Chore & Reward App!</h1>
+        {% endif %}
+    </div>
+    <p>This is the central hub for managing family chores and rewards.</p>
+    
+    {% if not current_user.is_authenticated %}
+        <p>Please <a href="{{ url_for('main.login_view') }}">log in</a> or <a href="{{ url_for('main.register_view') }}">register</a> to continue.</p>
+    {% elif current_user.role == 'parent' %}
+        <p>You are logged in as a parent. You can manage chores, rewards, and your children's activities from your <a href="{{ url_for('main.parent_dashboard') }}">dashboard</a>.</p>
+    {% elif current_user.role == 'child' %}
+        <p>You are logged in as a child. Check out <a href="{{ url_for('main.child_chores_view') }}">your chores</a> or see the <a href="{{ url_for('main.child_rewards_view') }}">available rewards</a>!</p>
+        <p>Your current points balance is: <strong>{{ current_user.current_points_balance }}</strong></p>
+    {% endif %}
+    
+    <p>Use the navigation bar above to explore the different sections of the app.</p>
 {% endblock %}

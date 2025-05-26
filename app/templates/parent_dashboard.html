@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Dashboard - Family Chore & Reward App{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Parent Dashboard</h1>
+</div>
+<p>Welcome to your dashboard, {{ current_user.username }}!</p>
+<p>From here, you can manage chores, log behavior for your children, define rewards, and oversee your children's activities and points.</p>
+
+<div class="dashboard-sections">
+    <section class="dashboard-section">
+        <h2>Quick Links</h2>
+        <ul>
+            <li><a href="{{ url_for('main.parent_chores_view') }}">Manage Chores</a></li>
+            <li><a href="{{ url_for('main.parent_log_behavior_view') }}">Log Behavior</a></li>
+            <li><a href="{{ url_for('main.parent_rewards_view') }}">Manage Rewards</a></li>
+            <li><a href="{{ url_for('main.parent_children_view') }}">Manage Children</a></li>
+        </ul>
+    </section>
+
+    <section class="dashboard-section">
+        <h2>Recent Activity (Placeholder)</h2>
+        <p>This section will show recent activities, like chores completed or rewards redeemed.</p>
+    </section>
+</div>
+{% endblock %}

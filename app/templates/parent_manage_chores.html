@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Chores - Parent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Manage Chores</h1>
+</div>
+
+<div id="message-area-chores" class="mb-3"></div>
+
+<button id="add-new-chore-btn" class="btn btn-primary mb-3">Add New Chore</button>
+
+<div id="create-chore-form-container" style="display: none;" class="mb-3 card card-body">
+    <h2>Create New Chore</h2>
+    <form id="create-chore-form">
+        <div class="form-group">
+            <label for="chore-name">Name:</label>
+            <input type="text" id="chore-name" name="name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="chore-description">Description:</label>
+            <textarea id="chore-description" name="description" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="chore-points">Points Value:</label>
+            <input type="number" id="chore-points" name="points_value" class="form-control" required min="0">
+        </div>
+        <div class="form-group">
+            <label for="chore-child-assignee">Assign to Child:</label>
+            <select id="chore-child-assignee" name="assigned_to_child_id" class="form-control">
+                <option value="">-- None --</option>
+                {# Children will be populated by JavaScript #}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="chore-date-due">Due Date (Optional):</label>
+            <input type="date" id="chore-date-due" name="date_due" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-success">Save Chore</button>
+        <button type="button" id="cancel-add-chore-btn" class="btn btn-secondary">Cancel</button>
+    </form>
+</div>
+
+<h2>Existing Chores</h2>
+<div id="chores-list">
+    <p>Loading chores...</p>
+</div>
+
+<!-- Edit Chore Modal -->
+<div id="editChoreModal" class="modal" style="display: none;">
+    <div class="modal-content card card-body">
+        <span class="close-btn" id="close-edit-modal-btn">&times;</span>
+        <h2>Edit Chore</h2>
+        <div id="message-area-edit-modal" class="mb-3"></div>
+        <form id="edit-chore-form">
+            <input type="hidden" id="edit-chore-id" name="chore_id">
+            <div class="form-group">
+                <label for="edit-chore-name">Name:</label>
+                <input type="text" id="edit-chore-name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-chore-description">Description:</label>
+                <textarea id="edit-chore-description" name="description" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-chore-points">Points Value:</label>
+                <input type="number" id="edit-chore-points" name="points_value" class="form-control" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="edit-chore-child-assignee">Assign to Child:</label>
+                <select id="edit-chore-child-assignee" name="assigned_to_child_id" class="form-control">
+                    <option value="">-- None --</option>
+                    {# Children will be populated by JavaScript #}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-chore-due-date">Due Date (Optional):</label>
+                <input type="date" id="edit-chore-due-date" name="date_due" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <button type="button" id="cancel-edit-chore-btn" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Basic Modal Styling */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 10% auto; /* 10% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  max-width: 600px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/parent_chores.js') }}" defer></script>
+{% endblock %}

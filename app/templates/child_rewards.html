@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Rewards - Child{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Rewards</h1>
+    <p>Hello, {{ current_user.username }}! See available rewards or your redemption history. Your current balance is: <strong id="child-current-points">{{ current_user.current_points_balance }} points</strong>.</p>
+</div>
+
+<div id="message-area-child-rewards" class="mb-3"></div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Available Rewards</h2>
+        <div id="available-rewards-list">
+            <p>Loading available rewards...</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h2>My Redemption History</h2>
+        <div id="my-redemption-history-list">
+            <p>Loading your redemption history...</p>
+        </div>
+    </div>
+</div>
+
+{# Include the specific JavaScript for this page #}
+<script src="{{ url_for('static', filename='js/child_rewards.js') }}" defer></script>
+{% endblock %}

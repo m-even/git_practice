@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Process Reward Redemptions - Parent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Process Reward Redemptions</h1>
+    <p>Review and process reward redemption requests from your children.</p>
+</div>
+
+<div id="message-area-redemptions" class="mb-3"></div>
+
+<h2>Redemption Requests</h2>
+<div id="redemption-requests-list">
+    <p>Loading redemption requests...</p>
+</div>
+
+{# Include the specific JavaScript for this page #}
+<script src="{{ url_for('static', filename='js/parent_redemptions.js') }}" defer></script>
+{% endblock %}
